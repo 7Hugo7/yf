@@ -1,6 +1,6 @@
 import { gql } from 'graphql-tag';
 import { Context } from './context';
-// You'll need these for authentication later
+// need these for authentication later
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
@@ -174,10 +174,14 @@ export const resolvers = {
         where: { id: args.id },
       });
     },
-    // TODO: Implement the 'me' query (requires authentication context)
-    me: (parent: any, args: any, context: Context) => {
-      // For now, return the first user until auth is implemented
-      return context.prisma.user.findFirst();
+    // Get current authenticated user
+    me: (_parent: any, _args: any, context: Context) => {
+      if (!context.userId) {
+        throw new Error('Not authenticated');
+      }
+      return context.prisma.user.findUnique({
+        where: { id: context.userId },
+      });
     },
     // TODO: Implement the 'wardrobe' query
     wardrobe: (parent: any, args: { userId: string }, context: Context) => {
@@ -202,14 +206,72 @@ export const resolvers = {
         data: {
           username: args.input.username,
           email: args.input.email,
+          phoneNumber: args.input.phoneNumber,
           passwordHash: hashedPassword,
         },
       });
-      // NOTE: Create a real JWT token here
-      const token = jwt.sign({ userId: user.id }, 'YOUR_APP_SECRET');
+
+      // Create session token
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'YOUR_APP_SECRET', {
+        expiresIn: '30d',
+      });
+
+      // Store session in database
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days from now
+
+      await context.prisma.session.create({
+        data: {
+          userId: user.id,
+          token,
+          expiresAt,
+        },
+      });
+
       return { token, user };
     },
-    // TODO: Implement other mutations: login, updateProfile, etc.
+    // Login mutation
+    login: async (parent: any, args: { login: string; password: string }, context: Context) => {
+      // Find user by username, email, or phone
+      const user = await context.prisma.user.findFirst({
+        where: {
+          OR: [
+            { username: args.login },
+            { email: args.login },
+            { phoneNumber: args.login },
+          ],
+        },
+      });
+
+      if (!user) {
+        throw new Error('Invalid credentials');
+      }
+
+      // Verify password
+      const valid = await bcrypt.compare(args.password, user.passwordHash);
+      if (!valid) {
+        throw new Error('Invalid credentials');
+      }
+
+      // Create session token
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'YOUR_APP_SECRET', {
+        expiresIn: '30d',
+      });
+
+      // Store session in database
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days from now
+
+      await context.prisma.session.create({
+        data: {
+          userId: user.id,
+          token,
+          expiresAt,
+        },
+      });
+
+      return { token, user };
+    },
   },
   // Define relations to tell GraphQL how to fetch nested data
   User: {

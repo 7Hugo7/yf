@@ -1,48 +1,77 @@
-// frontend/lib/main.dart
-import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:universal_io/io.dart';
-import 'home_page.dart';
+import '''package:flutter/material.dart''';
+import 'package:frontend/views/widget_tree.dart';
 
-void main() async {
-  // We're using HiveStore for caching, let's initialize it
-  await initHiveForFlutter();
-
-  final String host = Platform.isAndroid ? '10.0.2.2' : 'localhost';
-  final String graphqlEndpoint = 'http://$host:4000/';
-
-  final HttpLink httpLink = HttpLink(
-    graphqlEndpoint,
-  );
-
-  final ValueNotifier<GraphQLClient> client = ValueNotifier(
-    GraphQLClient(
-      link: httpLink,
-      // The default store is the InMemoryStore, which does NOT persist to disk
-      cache: GraphQLCache(store: HiveStore()),
-    ),
-  );
-
-  runApp(MyApp(client: client));
+void main() {
+  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  final ValueNotifier<GraphQLClient> client;
+//Material App
+//Scaffhold
+//AppBar
+//bottom navigataion bar
 
-  const MyApp({super.key, required this.client});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  
+  @override
   Widget build(BuildContext context) {
-    return GraphQLProvider(
-      client: client,
-      child: MaterialApp(
-        title: 'Flutter GraphQL Blog',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.black,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.black,
+          brightness: Brightness.dark,
+          background: Colors.black,
+          surface: Colors.black,
         ),
-        home: const HomePage(),
+        navigationBarTheme: NavigationBarThemeData(
+          indicatorColor: Colors.transparent,
+          indicatorShape: null,
+          overlayColor: WidgetStateProperty.all(Colors.transparent),
+          iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
+            if (states.contains(WidgetState.selected)) {
+              return IconThemeData(
+                color: const Color.fromARGB(
+                  255,
+                  255,
+                  255,
+                  255,
+                ), // Leuchtende Farbe
+                size: 32,
+                shadows: [
+                  Shadow(
+                    color: const Color.fromARGB(
+                      255,
+                      255,
+                      255,
+                      255,
+                    ).withOpacity(0.7),
+                    blurRadius: 20,
+                    offset: Offset(0, 0),
+                  ),
+                ],
+              );
+            }
+            return IconThemeData(
+              color: const Color.fromARGB(255, 171, 171, 171),
+              size: 24,
+            );
+          }),
+          labelTextStyle: WidgetStateProperty.all(
+            TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.black,
+        ),
       ),
+      home: WidgetTree(),
     );
   }
 }

@@ -1,28 +1,30 @@
+// This is a basic Flutter widget test.
+//
+// To perform an interaction with a widget in your test, use the WidgetTester
+// utility in the flutter_test package. For example, you can send tap and scroll
+// gestures. You can also use WidgetTester to find child widgets in the widget
+// tree, read text, and verify that the values of widget properties are correct.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/main.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
+
 
 void main() {
-  testWidgets('App builds and displays title', (WidgetTester tester) async {
-    // ARRANGE: Set up a mock GraphQL client for the test.
-    // This client won't actually connect to the server, it just satisfies the dependency.
-    final HttpLink httpLink = HttpLink('http://fake-graphql-endpoint.com/');
-    final ValueNotifier<GraphQLClient> client = ValueNotifier(
-      GraphQLClient(
-        link: httpLink,
-        cache: GraphQLCache(), // Use an in-memory cache for tests
-      ),
-    );
+  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MyApp());
 
-    // ACT: Build our app and trigger a frame.
-    // We pass the mock client to the MyApp widget here.
-    await tester.pumpWidget(MyApp(client: client));
+    // Verify that our counter starts at 0.
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
 
-    // ASSERT: Verify that the app title is present.
-    // This confirms that the widget tree has been built successfully.
-    expect(find.text('YF App'), findsOneWidget);
+    // Tap the '+' icon and trigger a frame.
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
 
-    // The default "counter" test has been removed as it's no longer relevant.
+    // Verify that our counter has incremented.
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
   });
 }

@@ -45,6 +45,7 @@ typings/
 
 .rpt2_cache/
 .rts2_cache/
+.claude
 .parcel-cache/
 
 .node_repl_history

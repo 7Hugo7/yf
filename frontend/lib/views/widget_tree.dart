@@ -9,11 +9,13 @@ import 'package:frontend/views/pages/waredrobe_page.dart';
 import 'widgets/navbar_widget.dart';
 
 List<Widget> pages = [
+  
   HomePage(),
   SearchPage(),
   WaredrobePage(),
   MessagesPage (),
   ProfilPage(),
+  
 ];
 
 class WidgetTree extends StatelessWidget {

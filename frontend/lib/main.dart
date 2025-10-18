@@ -1,4 +1,6 @@
 import '''package:flutter/material.dart''';
+import 'package:frontend/views/pages/login_page.dart';
+
 import 'package:frontend/views/widget_tree.dart';
 
 void main() {
@@ -23,7 +25,14 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+     
       theme: ThemeData(
+        
+        textSelectionTheme: const TextSelectionThemeData(
+    cursorColor: Colors.white, // Hier die gewünschte Farbe setzen
+    selectionColor: Colors.white24,
+    selectionHandleColor: Colors.white,
+  ),
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.black,
         colorScheme: ColorScheme.fromSeed(
@@ -35,17 +44,19 @@ class _MyAppState extends State<MyApp> {
         navigationBarTheme: NavigationBarThemeData(
           indicatorColor: Colors.transparent,
           indicatorShape: null,
+        
           overlayColor: WidgetStateProperty.all(Colors.transparent),
           iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
             if (states.contains(WidgetState.selected)) {
               return IconThemeData(
+                
                 color: const Color.fromARGB(
                   255,
                   255,
                   255,
                   255,
                 ), // Leuchtende Farbe
-                size: 32,
+                size: 29,
                 shadows: [
                   Shadow(
                     color: const Color.fromARGB(
@@ -53,7 +64,7 @@ class _MyAppState extends State<MyApp> {
                       255,
                       255,
                       255,
-                    ).withOpacity(0.7),
+                    ).withOpacity(0),
                     blurRadius: 20,
                     offset: Offset(0, 0),
                   ),
@@ -71,7 +82,7 @@ class _MyAppState extends State<MyApp> {
           backgroundColor: Colors.black,
         ),
       ),
-      home: WidgetTree(),
+   home: LoginPage(), // ✅ Start here
     );
   }
 }
